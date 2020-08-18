@@ -14,9 +14,14 @@ class GMap extends StatefulWidget {
   _GMapState createState() => _GMapState();
 }
 
-Future<http.Response> _loadCoordinate() {
-  return http.get(
-      "https://nominatim.openstreetmap.org/search.php?q=seberang%20perai&polygon_geojson=1&format=jsonv2");
+Future fetchGeoJson() async {
+
+  var jsonResponse;
+  var response = await http.get("https://nominatim.openstreetmap.org/search.php?q=selangor&polygon_geojson=1&format=jsonv2");
+
+  if (response.statusCode == 200)
+    return jsonResponse = json.decode(response.body);
+
 }
 
 enum maptap { a, b }
@@ -164,137 +169,150 @@ class _GMapState extends State<GMap> {
     });
   }
 
-  List<LatLng> coordinate = null;
-  String teststring = "test";
-  var apijson;
+//  List<LatLng> coordinate = null;
+//  String teststring = "test";
+//  var apijson;
+//  String testA;
 
+//  loadSeberangPerai() async {
+//    var jsonResponse = null;
+//    var response = await http.get(
+//        "https://nominatim.openstreetmap.org/search.php?q=seberang%20perai&polygon_geojson=1&format=jsonv2");
+//    if (response.statusCode == 200) {
+//      jsonResponse = json.decode(response.body);
+////      testA = jsonResponse[0]['category'];
+////      apijson = jsonResponse;
+//      return _result = jsonResponse;
+//    }
+//  }
 
-  loadSeberangPerai() async {
-    var jsonResponse = null;
-    var response = await http.get(
-        "https://nominatim.openstreetmap.org/search.php?q=seberang%20perai&polygon_geojson=1&format=jsonv2");
-    if (response.statusCode == 200) {
-      jsonResponse = json.decode(response.body);
-      apijson = jsonResponse;
-
-    }
-  }
-
-  Future<http.Response> _loadSP(){
-      return http.get("https://nominatim.openstreetmap.org/search.php?q=seberang%20perai&polygon_geojson=1&format=jsonv2");
-
-  }
+//  Future<http.Response> _loadSP() {
+//    return http.get(
+//        "https://nominatim.openstreetmap.org/search.php?q=seberang%20perai&polygon_geojson=1&format=jsonv2");
+//  }
 
   @override
   Widget build(BuildContext context) {
-    String apitest;
 
-    loadSeberangPerai();
-    
-    _loadSP().then((response) {
-        var jsonResponse =json.decode(response.body);
-        _result = jsonResponse;
-    });
+    return FutureBuilder(
+      future: fetchGeoJson(),
+      builder: (context, snapshot) {
 
-    print(_result);
 
-    setState(() {
-      if (settap == maptap.a)
-        circleColor = Colors.red;
-      else if (settap == maptap.b) circleColor = Colors.yellow;
-    });
 
-    Set<Polygon> _polygons = HashSet<Polygon>();
-    Set<Polygon> _testpolygon = HashSet<Polygon>();
 
-    _polygons.add(
-      Polygon(
-        polygonId: PolygonId("0"),
-        points: listPolygonPenang,
-        fillColor: _polygonColor,
-        strokeWidth: 1,
-        consumeTapEvents: true,
-        onTap: () {
-          setState(() {
-            _polygonColor = Color.fromRGBO(102, 51, 153, .5);
-            selectmap = malaysiaMap.penang;
+        List dynamicc = snapshot.data[0]['geojson']['coordinates'][0];
+
+        List<LatLng> coordinates = dynamicc.map((e) {
+          return LatLng(e[0],e[1]);
+        }).toList();
+
+        dynamicc.map((e) {
+          final lat = e[0];
+          final lng = e[1];
+
+          return LatLng(lat,lng);
+
+
+        }).toList();
+
+
+
+        print(coordinates);
+
+
+
+
+        Set<Polygon> _polygons = HashSet<Polygon>();
+        Set<Polygon> _testpolygon = HashSet<Polygon>();
+        List<List> j;
+
+        _polygons.add(
+          Polygon(
+            polygonId: PolygonId("0"),
+            points: coordinates,
+            fillColor: Colors.red,
+            strokeWidth: 1,
+            consumeTapEvents: true,
+            onTap: () {
+              setState(() {
+                _polygonColor = Color.fromRGBO(102, 51, 153, .5);
+                selectmap = malaysiaMap.penang;
 //          _mapController.moveCamera(
 //              CameraUpdate.newLatLng(LatLng(5.380652,100.252891),
 //
 //              ));
-            _mapController
-                .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-              target: LatLng(5.380652, 100.252891),
-              zoom: 11,
-            )));
-            //_goToPosition1();
-          });
-        },
-      ),
-    );
+                _mapController
+                    .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                  target: LatLng(5.380652, 100.252891),
+                  zoom: 11,
+                )));
+                //_goToPosition1();
+              });
+            },
+          ),
+        );
 
-    _polygons.add(Polygon(
-      polygonId: PolygonId("1"),
-      points: listTest,
-      fillColor: _testColor,
-      strokeWidth: 1,
-      consumeTapEvents: true,
-      onTap: () {
-        setState(() {
-//          _testColor = Colors.yellow;
-          selectmap = malaysiaMap.penang;
+        _polygons.add(Polygon(
+          polygonId: PolygonId("1"),
+          points: listTest,
+          fillColor: _testColor,
+          strokeWidth: 1,
+          consumeTapEvents: true,
+          onTap: () {
+            setState(() {
+
+              selectmap = malaysiaMap.penang;
 //          _mapController.moveCamera(
 //              CameraUpdate.newLatLng(LatLng(5.380652,100.252891),
 //
 //              ));
-          _mapController.animateCamera(
-              CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: LatLng(5.351545, 100.455316),
-                    zoom: 11,
-                  )
-              )
-          );
-          //_goToPosition1();
-        });
-      },
-    ));
+              _mapController
+                  .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                target: LatLng(5.351545, 100.455316),
+                zoom: 11,
+              )));
+              //_goToPosition1();
+            });
+          },
+        ));
 
-    CameraPosition position() {
-      switch (selectmap) {
-        case malaysiaMap.malaysia:
+        CameraPosition position() {
+          switch (selectmap) {
+            case malaysiaMap.malaysia:
+              return CameraPosition(
+                target: LatLng(5.285153, 100.456238),
+                zoom: 6.5,
+              );
+            case malaysiaMap.penang:
+              return CameraPosition(
+                target: LatLng(5.285153, 100.456238),
+                zoom: 15,
+              );
+          }
+
+          setState(() {});
+
           return CameraPosition(
             target: LatLng(5.285153, 100.456238),
             zoom: 6.5,
           );
-        case malaysiaMap.penang:
-          return CameraPosition(
-            target: LatLng(5.285153, 100.456238),
-            zoom: 15,
-          );
-      }
+        }
 
-      setState(() {});
-
-      return CameraPosition(
-        target: LatLng(5.285153, 100.456238),
-        zoom: 6.5,
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: Text(teststring)),
-      body: Stack(
-        children: <Widget>[
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: position(),
-            markers: _markers,
-            polygons: _polygons,
-            onTap: (latLng) {
-              // setState(() {
-              //   _polygonColor = Colors.green;
-              // });
+     return Scaffold(
+        appBar: AppBar(title: Text('Map')),
+        body: Stack(
+          children: <Widget>[
+            GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: position(),
+              markers: _markers,
+              mapType: MapType.hybrid,
+              polygons: _polygons,
+              onTap: (latLng) {
+                // setState(() {
+                //   _polygonColor = Colors.green;
+                // });
 
 //               setState(() {
 //                 _polygonColor = Colors.green;
@@ -317,31 +335,32 @@ class _GMapState extends State<GMap> {
 //                 }
 //                 settap = maptap.b;
 //               });
-            },
-            polylines: _polylines,
-            circles: _circles,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-          ),
-//          Container(
-//            alignment: Alignment.bottomCenter,
-//            padding: EdgeInsets.fromLTRB(0, 0, 0, 80),
-//            child: Text(apijson[0]['category']),
-//          )
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Increment',
-        child: Icon(Icons.map),
-        onPressed: () {
-          setState(() {
-            _showMapStyle = !_showMapStyle;
-          });
+              },
+              polylines: _polylines,
+              circles: _circles,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+            ),
+            Container(
+              alignment: Alignment.bottomCenter,
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 80),
+              child: Text(snapshot.data[0]['type']),
+            )
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: FloatingActionButton(
+          tooltip: 'Increment',
+          child: Icon(Icons.map),
+          onPressed: () {
+            setState(() {
+              _showMapStyle = !_showMapStyle;
+            });
 
-          _toggleMapStyle();
-        },
-      ),
+            _toggleMapStyle();
+          },
+        ),
+      );}
     );
   }
 }
