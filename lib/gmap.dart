@@ -201,20 +201,21 @@ class _GMapState extends State<GMap> {
 
 
 
+
         List dynamicc = snapshot.data[0]['geojson']['coordinates'][0];
 
         List<LatLng> coordinates = dynamicc.map((e) {
           return LatLng(e[0],e[1]);
         }).toList();
 
-        dynamicc.map((e) {
-          final lat = e[0];
-          final lng = e[1];
-
-          return LatLng(lat,lng);
-
-
-        }).toList();
+//        dynamicc.map((e) {
+//          final lat = e[0];
+//          final lng = e[1];
+//
+//          return LatLng(lat,lng);
+//
+//
+//        }).toList();
 
 
 
@@ -299,11 +300,13 @@ class _GMapState extends State<GMap> {
           );
         }
 
+
+
      return Scaffold(
         appBar: AppBar(title: Text('Map')),
         body: Stack(
           children: <Widget>[
-            GoogleMap(
+            snapshot.hasData ? GoogleMap(
               onMapCreated: _onMapCreated,
               initialCameraPosition: position(),
               markers: _markers,
@@ -340,11 +343,12 @@ class _GMapState extends State<GMap> {
               circles: _circles,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
-            ),
+            ) : CircularProgressIndicator(),
+
             Container(
               alignment: Alignment.bottomCenter,
               padding: EdgeInsets.fromLTRB(0, 0, 0, 80),
-              child: Text(snapshot.data[0]['type']),
+              child: Text('coding with curry'),
             )
           ],
         ),
